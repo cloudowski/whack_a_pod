@@ -83,7 +83,7 @@ func deletePod(podname string) ([]byte, error) {
 }
 
 func deletePods(node string) ([]byte, error) {
-	url := root + "/api/v1/namespaces/default/pods" + "?labelSelector=" + selector
+	url := root + "/api/v1/namespaces/" + gameNamespace + "/pods" + "?labelSelector=" + selector
 	if len(node) > 0 {
 		fs := "&fieldSelector=spec.nodeName=" + node
 		url += fs
@@ -142,7 +142,7 @@ func toggleNode(nodename string, inactive bool) ([]byte, error) {
 }
 
 func deleteReplicaSet() ([]byte, error) {
-	url := root + "/apis/extensions/v1beta1/namespaces/default/replicasets" + "?labelSelector=" + selector
+	url := root + "/apis/extensions/v1beta1/namespaces/" + gameNamespace + "/replicasets" + "?labelSelector=" + selector
 
 	b, status, err := queryK8sAPI(url, "DELETE", nil)
 	if err != nil {
@@ -198,7 +198,7 @@ type minimumPort struct {
 }
 
 func createDeployment() ([]byte, error) {
-	selflink := "/apis/extensions/v1beta1/namespaces/default/deployments"
+	selflink := "/apis/extensions/v1beta1/namespaces/" + gameNamespace + "/deployments"
 	url := root + selflink
 
 	image := os.Getenv("APIIMAGE")
@@ -259,7 +259,7 @@ func createDeployment() ([]byte, error) {
 }
 
 func deleteDeployment(depname string) ([]byte, error) {
-	selflink := "/apis/extensions/v1beta1/namespaces/default/deployments/" + depname
+	selflink := "/apis/extensions/v1beta1/namespaces/" + gameNamespace + "/deployments/" + depname
 	url := root + selflink
 
 	b, status, err := queryK8sAPI(url, "DELETE", nil)

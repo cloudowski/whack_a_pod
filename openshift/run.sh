@@ -1,3 +1,4 @@
+PROJ=$(oc project -q)
 oc new-app --docker-image=cloudowski/whackapod-game -l stack=whackapod
 oc new-app --docker-image=cloudowski/whackapod-admin -l stack=whackapod --env="APIIMAGE=cloudowski/whackapod-api"
 oc new-app --docker-image=cloudowski/whackapod-api -l stack=whackapod
@@ -16,3 +17,5 @@ GAMEHOST=$(oc get route whackapod-game -o=jsonpath='{.status.ingress[0].host}')
 
 oc expose svc/whackapod-admin --hostname=$GAMEHOST --path=/admin
 oc expose svc/whackapod-api --hostname=$GAMEHOST --path=/api
+
+oc set env dc whackapod-admin GAMENAMESPACE=${PROJ}
