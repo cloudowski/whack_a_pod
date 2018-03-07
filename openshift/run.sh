@@ -21,3 +21,7 @@ oc expose svc/whackapod-admin --hostname=$GAMEHOST --path=/admin
 oc expose svc/whackapod-api --hostname=$GAMEHOST --path=/api
 
 oc set env dc whackapod-admin GAMENAMESPACE=${PROJ}
+
+oc set probe dc/whackapod-api --readiness --liveness --get-url=http://:8080/healthz
+oc set probe dc/whackapod-admin --readiness --liveness --get-url=http://:8080/healthz
+oc set probe dc/whackapod-game --readiness --liveness --get-url=http://:8080/
