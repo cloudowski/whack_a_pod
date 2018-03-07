@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: whackapod
+objects:
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: wap-admin
+    name: wap-admin
+  spec:
+    replicas: 1
+    selector:
+      app: wap-admin
+      deploymentconfig: wap-admin
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: wap-admin
+          deploymentconfig: wap-admin
+      spec:
+        containers:
+        - name: admin
+          image: cloudowski/whackapod-admin
+          imagePullPolicy: IfNotPresent
+        # serviceAccount: game
+    triggers:
+    - type: ConfigChange
+
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: wap-game
+    name: wap-game
+  spec:
+    replicas: 4
+    selector:
+      app: wap-game
+      deploymentconfig: wap-game
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: wap-game
+          deploymentconfig: wap-game
+      spec:
+        containers:
+        - name: game
+          image: cloudowski/whackapod-game
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: shared-data
+            mountPath: /usr/share/nginx/html/config
+        - name: config
+          image: openshift/origin
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args: ["-c", "oc get route wap-admin -o=jsonpath='http://{.status.ingress[0].host}' | tee /config/adminhost && sleep 99999 || sleep 10"]
+          volumeMounts:
+          - name: shared-data
+            mountPath: /config
+        dnsPolicy: ClusterFirst
+        terminationGracePeriodSeconds: 30
+        serviceAccount: game
+        volumes:
+        - name: shared-data
+          emptyDir: {}
+    triggers:
+    - type: ConfigChange
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: wap-game
+    name: wap-game
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: wap-game
+      deploymentconfig: wap-game
+    sessionAffinity: None
+    type: ClusterIP
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: wap-admin
+    name: wap-admin
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: wap-admin
+      deploymentconfig: wap-admin
+    sessionAffinity: None
+    type: ClusterIP
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: wap-game
+    name: wap-game
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: wap-game
+    wildcardPolicy: None
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: wap-admin
+    name: wap-admin
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: wap-admin
+    wildcardPolicy: None
+
+parameters:
+  - name: GAMEID
+    description: "Name of this project"
+    value: "mygame"
