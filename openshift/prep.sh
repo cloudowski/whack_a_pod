@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 oc create serviceaccount wap-game
 oc create serviceaccount wap-admin
 oc policy add-role-to-user view -z wap-game

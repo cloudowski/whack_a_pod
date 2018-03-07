@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 PROJ=$(oc project -q)
 oc new-app --docker-image=cloudowski/whackapod-game -l stack=whackapod
 oc new-app --docker-image=cloudowski/whackapod-admin -l stack=whackapod --env="APIIMAGE=cloudowski/whackapod-api"
