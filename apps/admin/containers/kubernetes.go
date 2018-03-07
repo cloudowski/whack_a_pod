@@ -56,7 +56,7 @@ func queryK8sAPI(url, method string, data []byte) ([]byte, int, error) {
 }
 
 func listPods() ([]byte, error) {
-	url := root + "/api/v1/pods?labelSelector=" + selector
+	url := root + "/api/v1/namespaces/" + gameNamespace + "/pods?labelSelector=" + selector
 
 	b, _, err := queryK8sAPI(url, "GET", nil)
 	if err != nil {
