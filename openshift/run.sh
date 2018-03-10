@@ -3,7 +3,7 @@
 PROJ=$(oc project -q)
 oc new-app --docker-image=cloudowski/whackapod-game -l stack=whackapod
 oc new-app --docker-image=cloudowski/whackapod-admin -l stack=whackapod --env="APIIMAGE=cloudowski/whackapod-api"
-kubectl run api-deployment --image=cloudowski/whackapod-api --replicas=1 --port=8080 --labels="app=api,stack=whackapod"
+kubectl run api-deployment --image=cloudowski/whackapod-api --replicas=1 --port=8080 --labels="app=api"
 
 oc patch dc/whackapod-admin --patch '{"spec":{"template":{"spec":{"serviceAccountName": "wap-admin"}}}}'
 oc patch dc/whackapod-game --patch '{"spec":{"template":{"spec":{"serviceAccountName": "wap-game"}}}}'
