@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -29,12 +30,13 @@ var (
 	client              httpClient
 	pool                *x509.CertPool
 	token               = ""
+	gameNamespace       = "default"
 	errItemNotExist     = fmt.Errorf("Item does not exist")
 	errItemAlreadyExist = fmt.Errorf("Item already exists")
 )
 
 const (
-	root             = "https://kubernetes"
+	root             = "https://kubernetes.default"
 	selector         = "app=api"
 	defaultTokenPath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 	defaultCertPath  = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
@@ -43,6 +45,14 @@ const (
 func main() {
 	log.Printf("starting whack a pod admin api")
 	var err error
+
+	var ns = os.Getenv("GAMENAMESPACE")
+	if len(ns) == 0 {
+		log.Printf("GAMENAMESPACE environment variable not set - using default gamenamespace: %s", gameNamespace)
+	} else {
+		log.Printf("Using namespace %s", gameNamespace)
+		gameNamespace = ns
+	}
 
 	b, err := ioutil.ReadFile(defaultTokenPath)
 	if err != nil {
